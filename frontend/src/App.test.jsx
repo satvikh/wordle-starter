@@ -126,8 +126,10 @@ describe('App', () => {
     const savedGame = screen.getByRole('button', { name: /5 letters.*5 left/i })
     expect(savedGame.querySelector('.saved-game-thumbnail')).toBeInTheDocument()
     expect(savedGame.querySelectorAll('.saved-thumb-tile')).toHaveLength(30)
-    expect(savedGame.querySelector('.saved-thumb-tile.green')).toHaveTextContent('C')
-    expect(savedGame.querySelector('.saved-thumb-tile.yellow')).toHaveTextContent('R')
+    expect(savedGame.querySelector('.saved-thumb-tile.green').textContent).toBe('')
+    expect(savedGame.querySelector('.saved-thumb-tile.yellow').textContent).toBe('')
+    expect(savedGame).not.toHaveTextContent('5 letters')
+    expect(savedGame).not.toHaveTextContent('5 left')
   })
 
   it('removes a saved game from the server and shelf', async () => {

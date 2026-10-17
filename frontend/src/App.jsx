@@ -36,9 +36,9 @@ function SavedGameThumbnail({ saved }) {
         return (
           <span className="saved-thumb-row" key={rowIndex}>
             {Array.from({ length: saved.word_length }, (_, letterIndex) => {
-              const letter = guess?.word?.[letterIndex]?.toUpperCase() || ''
+              const filled = Boolean(guess?.word?.[letterIndex])
               const state = guess?.feedback?.[letterIndex] || ''
-              return <span className={`saved-thumb-tile ${state} ${letter ? 'filled' : ''}`} key={letterIndex}>{letter}</span>
+              return <span className={`saved-thumb-tile ${state} ${filled ? 'filled' : ''}`} key={letterIndex} />
             })}
           </span>
         )
@@ -231,15 +231,12 @@ function App() {
           <div className="saved-game-list">
             {savedGames.map((saved) => <div className="saved-game-wrap" key={saved.id}>
               <button
+                aria-label={`${saved.word_length} letters, ${saved.status === 'active' ? `${saved.guesses_remaining} left` : saved.status}`}
                 className={`saved-game ${saved.id === game?.id ? 'current' : ''}`}
                 disabled={loading}
                 onClick={() => restoreGame(saved.id)}
               >
                 <SavedGameThumbnail saved={saved} />
-                <span className="saved-game-info">
-                  <strong>{saved.word_length} letters</strong>
-                  <span>{saved.status === 'active' ? `${saved.guesses_remaining} left` : saved.status}</span>
-                </span>
               </button>
               <button className="remove-game" aria-label={`Remove ${saved.word_length}-letter game`} disabled={loading} onClick={() => removeGame(saved.id)}>×</button>
             </div>)}
