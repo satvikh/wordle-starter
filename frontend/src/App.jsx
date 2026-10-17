@@ -18,9 +18,33 @@ function gameSummary(game) {
   return {
     id: game.id,
     word_length: game.word_length,
+    max_guesses: game.max_guesses,
     status: game.status,
     guesses_remaining: game.guesses_remaining,
+    guesses: (game.guesses || []).map(({ word, feedback }) => ({ word, feedback })),
   }
+}
+
+function SavedGameThumbnail({ saved }) {
+  const guesses = saved.guesses || []
+  const maxGuesses = saved.max_guesses || saved.word_length + 1
+
+  return (
+    <span className="saved-game-thumbnail" aria-hidden="true" style={{ '--saved-word-length': saved.word_length }}>
+      {Array.from({ length: maxGuesses }, (_, rowIndex) => {
+        const guess = guesses[rowIndex]
+        return (
+          <span className="saved-thumb-row" key={rowIndex}>
+            {Array.from({ length: saved.word_length }, (_, letterIndex) => {
+              const letter = guess?.word?.[letterIndex]?.toUpperCase() || ''
+              const state = guess?.feedback?.[letterIndex] || ''
+              return <span className={`saved-thumb-tile ${state} ${letter ? 'filled' : ''}`} key={letterIndex}>{letter}</span>
+            })}
+          </span>
+        )
+      })}
+    </span>
+  )
 }
 
 function Board({ game, draft }) {
@@ -211,8 +235,11 @@ function App() {
                 disabled={loading}
                 onClick={() => restoreGame(saved.id)}
               >
-                <strong>{saved.word_length} letters</strong>
-                <span>{saved.status === 'active' ? `${saved.guesses_remaining} left` : saved.status}</span>
+                <SavedGameThumbnail saved={saved} />
+                <span className="saved-game-info">
+                  <strong>{saved.word_length} letters</strong>
+                  <span>{saved.status === 'active' ? `${saved.guesses_remaining} left` : saved.status}</span>
+                </span>
               </button>
               <button className="remove-game" aria-label={`Remove ${saved.word_length}-letter game`} disabled={loading} onClick={() => removeGame(saved.id)}>×</button>
             </div>)}

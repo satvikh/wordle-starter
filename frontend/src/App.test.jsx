@@ -100,6 +100,36 @@ describe('App', () => {
     expect(await screen.findByText('6-letter Wordle')).toBeInTheDocument()
   })
 
+  it('renders a saved game as a compact board thumbnail', () => {
+    const stored = new Map()
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key) => stored.get(key) || null,
+        setItem: (key, value) => stored.set(key, value),
+      },
+    })
+    window.localStorage.setItem('wordle-games', JSON.stringify([
+      {
+        id: 'thumbnail-game',
+        word_length: 5,
+        max_guesses: 6,
+        status: 'active',
+        guesses_remaining: 5,
+        guesses: [{ word: 'crane', feedback: ['green', 'yellow', 'gray', 'gray', 'green'] }],
+      },
+    ]))
+    vi.stubGlobal('fetch', vi.fn())
+
+    render(<App />)
+
+    const savedGame = screen.getByRole('button', { name: /5 letters.*5 left/i })
+    expect(savedGame.querySelector('.saved-game-thumbnail')).toBeInTheDocument()
+    expect(savedGame.querySelectorAll('.saved-thumb-tile')).toHaveLength(30)
+    expect(savedGame.querySelector('.saved-thumb-tile.green')).toHaveTextContent('C')
+    expect(savedGame.querySelector('.saved-thumb-tile.yellow')).toHaveTextContent('R')
+  })
+
   it('removes a saved game from the server and shelf', async () => {
     const stored = new Map()
     Object.defineProperty(window, 'localStorage', {
