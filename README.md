@@ -35,6 +35,20 @@ In our version of Wordle, there are 2 key differences from the original:
   - Validating that guesses are real words
 - Use appropriate data storage for game state
 
+### Implemented API
+
+The backend stores games and guesses in SQLite (`backend/wordle.sqlite3` by default; override with `WORDLE_DB_PATH`). An active game's answer remains on the server and is returned only after a win or loss. Guess validation uses a bundled 70k-word English list for lengths 5–8, so it does not depend on an external service during play.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/games` | Start a game. Body: `{ "word_length": 5 }` (5–8; default 5). |
+| `GET` | `/games/{game_id}` | Retrieve game state and ordered guess history. |
+| `DELETE` | `/games/{game_id}` | Permanently remove a game and its guess history. |
+| `POST` | `/games/{game_id}/guesses` | Submit a word. Body: `{ "word": "crane" }`. |
+| `GET` | `/games/{game_id}/guesses/{guess_id}` | Retrieve a submitted guess. |
+
+The guess response supplies green/yellow/gray feedback for every character and the updated game state. Invalid words or lengths return `422`, an unknown game returns `404`, and a completed game rejects guesses with `409`.
+
 ### Frontend Requirements
 
 - Build a React UI that allows users to:
@@ -118,3 +132,22 @@ API documentation is automatically available at `http://localhost:8000/docs`.
 4. Build your UI in the `frontend/src/` directory
 5. The frontend is configured to make requests to `http://localhost:8000`
 
+### Tests
+
+Run the backend API/domain tests:
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest -q
+```
+
+Run the frontend interaction tests, lint, and production build:
+
+```bash
+cd frontend
+npm install
+npm test -- --run
+npm run lint
+npm run build
+```
